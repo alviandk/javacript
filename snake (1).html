@@ -1,0 +1,126 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Snake Games</title>
+</head>
+<body>
+
+    <canvas id="cacing" width="450" height="450"></canvas>
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function(event){
+        var canvas = document.getElementById("cacing");
+        var ctx = canvas.getContext("2d");
+        var canvasWidth = canvas.clientWidth;
+        var canvasHeight = canvas.clientHeight;
+        
+        var cellWidth = 10;
+        var food;
+        var direction;
+        
+        var snake_array;
+        
+        function create_snake(){
+            var length = 5;
+            snake_array = [];
+            for(var i = length - 1 ; i >= 0; i--){
+                snake_array.push({x: i, y: 0});
+            }
+        }
+        
+        function paint(){
+            ctx.fillStyle = "black";
+            ctx.fillRect(0,0,canvasWidth,canvasHeight);
+            ctx.strokeStyle = "blue";
+            ctx.strokeRect(0,0,canvasWidth,canvasHeight);
+            
+            var snakeX = snake_array[0].x;
+            var snakeY = snake_array[0].y;
+            
+            if(direction == "right")
+                snakeX++;
+            else if(direction == "up")
+                snakeY--;
+            else if(direction == "left")
+                snakeX--;
+            else if(direction == "down")
+                snakeY++;
+            
+            if(snakeX == -1 || snakeX == canvasWidth / cellWidth || snakeY == -1 || snakeY == canvasHeight / cellWidth || check_collision(snakeX, snakeY, snake_array)){
+                initialGame();
+                return;
+            }
+            
+            if(snakeX == food.x && snakeY == food.y){
+                var tail = {x: snakeX, y: snakeY};
+                
+                create_food();
+            }
+            else{
+                var tail = snake_array.pop();
+                tail.x = snakeX;
+                tail.y = snakeY;
+            }
+            
+            snake_array.unshift(tail);
+            
+            for(var i = 0; i < snake_array.length; i++){
+                var c = snake_array[i];
+                paint_cell(c.x,c.y);
+            }
+            
+            paint_cell(food.x, food.y);
+        }
+        
+        function paint_cell(x, y){
+            ctx.fillStyle = "white";
+            ctx.fillRect(x*cellWidth,y*cellWidth,cellWidth,cellWidth);
+            ctx.strokeStyle = "black";
+            ctx.fillRect(x*cellWidth,y*cellWidth,cellWidth,cellWidth);
+        }
+        
+        function create_food(){
+            food = {
+                x: Math.round(Math.random() * (canvasWidth - cellWidth)/  cellWidth),
+                y: Math.round(Math.random() * (canvasHeight - cellWidth)/ cellWidth)
+            };
+        }
+        
+        function check_collision(x, y, array){
+            for (var i = 0; i < array.length; i++){
+                if(array[i].x == x && array[i].y == y)
+                    return true;
+            }
+            return false;
+        }
+        
+        function initialGame(){
+            direction = "right";
+            create_snake();
+            create_food();
+            
+            if(typeof game_loop != "undefined")
+                clearInterval(game_loop);
+            game_loop = setInterval(paint,60);
+        }
+        initialGame();
+        
+        document.addEventListener("keydown", keyDownTextField, false);
+				
+        function keyDownTextField(e) {
+            var key = e.which;
+            if (key == "37" && direction != "right")
+                direction = "left";
+            else if (key == "38" && direction != "down")
+                direction = "up";
+            else if (key == "39" && direction != "left")
+                direction = "right";
+            else if (key == "40" && direction != "up")
+                direction = "down";
+        }
+    });
+</script>
+    
+</body>
+</html>
